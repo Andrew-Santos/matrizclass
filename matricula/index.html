@@ -124,6 +124,7 @@
 
         input[type="text"],
         input[type="tel"],
+        input[type="email"],
         select {
             width: 100%;
             padding: 13px 16px;
@@ -515,10 +516,10 @@
         const SUPABASE_URL = 'https://roqyvjfinklkjrwyrqow.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvcXl2amZpbmtsa2pyd3lycW93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3Nzg0MjUsImV4cCI6MjA4NTM1NDQyNX0.nv9RWORgStI0encVGqeIoX2CNt0zYQqXKVwMpbzLOFg';
 
-        const baseQuestions = [
+        const questions = [
             {
                 id: 'nome_completo',
-                number: '1 de 10',
+                number: '1 de 12',
                 title: 'Qual o seu nome completo?',
                 type: 'text',
                 placeholder: 'Digite seu nome completo',
@@ -526,7 +527,7 @@
             },
             {
                 id: 'cpf',
-                number: '2 de 10',
+                number: '2 de 12',
                 title: 'Qual o seu CPF?',
                 type: 'tel',
                 placeholder: '000.000.000-00',
@@ -535,7 +536,7 @@
             },
             {
                 id: 'rg',
-                number: '3 de 10',
+                number: '3 de 12',
                 title: 'Qual o seu RG?',
                 type: 'tel',
                 placeholder: '00.000.000-0',
@@ -545,7 +546,7 @@
             },
             {
                 id: 'telefone',
-                number: '4 de 10',
+                number: '4 de 12',
                 title: 'Qual o seu telefone?',
                 type: 'tel',
                 placeholder: '(00) 00000-0000',
@@ -553,8 +554,16 @@
                 maxLength: 15
             },
             {
+                id: 'email',
+                number: '5 de 12',
+                title: 'Qual o seu e-mail?',
+                type: 'email',
+                placeholder: 'seu@email.com',
+                required: true
+            },
+            {
                 id: 'cep',
-                number: '5 de 10',
+                number: '6 de 12',
                 title: 'Qual o seu CEP?',
                 type: 'tel',
                 placeholder: '00000-000',
@@ -563,7 +572,7 @@
             },
             {
                 id: 'logradouro',
-                number: '6 de 10',
+                number: '7 de 12',
                 title: 'Qual o seu endereço?',
                 type: 'text',
                 placeholder: 'Rua, Avenida, etc.',
@@ -571,7 +580,7 @@
             },
             {
                 id: 'numero',
-                number: '7 de 10',
+                number: '8 de 12',
                 title: 'Qual o número?',
                 type: 'text',
                 placeholder: 'Número',
@@ -580,7 +589,7 @@
             },
             {
                 id: 'cidade',
-                number: '8 de 10',
+                number: '9 de 12',
                 title: 'Qual a sua cidade?',
                 type: 'text',
                 placeholder: 'Digite sua cidade',
@@ -588,7 +597,7 @@
             },
             {
                 id: 'estado',
-                number: '9 de 10',
+                number: '10 de 12',
                 title: 'Qual o seu estado?',
                 type: 'text',
                 placeholder: 'UF (ex: SP)',
@@ -597,56 +606,25 @@
             },
             {
                 id: 'concluiu_ensino_superior',
-                number: '10 de 10',
+                number: '11 de 12',
                 title: 'Já concluiu o ensino superior?',
                 type: 'radio',
-                options: ['Sim', 'Não'],
+                options: ['Sim', 'Não', 'Estou cursando'],
                 required: true
+            },
+            {
+                id: 'instituicao',
+                number: '12 de 12',
+                title: 'Qual instituição de ensino?',
+                type: 'text',
+                placeholder: 'Nome da instituição',
+                required: true,
+                maxLength: 200
             }
         ];
 
-        const conditionalQuestions = {
-            concluiu_sim: [
-                {
-                    id: 'instituicao_concluida',
-                    number: '11 de 11',
-                    title: 'Em qual instituição você concluiu?',
-                    type: 'text',
-                    placeholder: 'Nome da instituição',
-                    required: true,
-                    maxLength: 200,
-                    condition: 'concluiu_ensino_superior',
-                    conditionValue: 'Sim'
-                }
-            ],
-            concluiu_nao: [
-                {
-                    id: 'instituicao_cursando',
-                    number: '11 de 12',
-                    title: 'Em qual instituição você estuda?',
-                    type: 'text',
-                    placeholder: 'Nome da instituição',
-                    required: true,
-                    maxLength: 200,
-                    condition: 'concluiu_ensino_superior',
-                    conditionValue: 'Não'
-                },
-                {
-                    id: 'semestre_atual',
-                    number: '12 de 12',
-                    title: 'Em qual semestre você está?',
-                    type: 'select',
-                    required: true,
-                    options: ['1º Semestre', '2º Semestre', '3º Semestre', '4º Semestre', '5º Semestre', '6º Semestre', '7º Semestre', '8º Semestre', '9º Semestre', '10º Semestre'],
-                    condition: 'concluiu_ensino_superior',
-                    conditionValue: 'Não'
-                }
-            ]
-        };
-
         let currentQuestion = 0;
         let formData = {};
-        let questions = [...baseQuestions];
         let rgUsesCpfFormat = false;
 
         function applyCpfMask(value) {
@@ -671,8 +649,7 @@
             value = value.replace(/\D/g, '');
             value = value.substring(0, 11);
             value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
-            value = value.replace(/(\d)(\d{4})$/, '$1 $2');
-            value = value.replace(/(\d{4})(\d{4})$/, '$1-$2');
+            value = value.replace(/(\d)(\d{4})$/, '$1-$2');
             return value;
         }
 
@@ -685,6 +662,11 @@
 
         function removeMask(value) {
             return value.replace(/\D/g, '');
+        }
+
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
         }
 
         async function buscarCep(cep) {
@@ -723,23 +705,6 @@
                 }
                 return null;
             }
-        }
-
-        function updateQuestionFlow() {
-            // Remove perguntas condicionais antigas
-            questions = baseQuestions.filter(() => true);
-
-            // Adiciona novas perguntas condicionais baseadas na resposta
-            if (formData.concluiu_ensino_superior === 'Sim') {
-                questions = [...questions, ...conditionalQuestions.concluiu_sim];
-            } else if (formData.concluiu_ensino_superior === 'Não') {
-                questions = [...questions, ...conditionalQuestions.concluiu_nao];
-            }
-
-            // Atualiza numeração das perguntas
-            questions.forEach((q, index) => {
-                q.number = `${index + 1} de ${questions.length}`;
-            });
         }
 
         function toggleRgFormat(format) {
@@ -829,6 +794,8 @@
                 value = value.toUpperCase().substring(0, 2);
                 input.value = value;
                 formData[fieldId] = value;
+            } else if (fieldId === 'email') {
+                formData[fieldId] = value.toLowerCase().trim();
             } else {
                 formData[fieldId] = value;
             }
@@ -851,18 +818,6 @@
                     radio.checked = false;
                 }
             });
-
-            // Se for a pergunta de conclusão do ensino superior, atualiza o fluxo
-            if (fieldId === 'concluiu_ensino_superior') {
-                updateQuestionFlow();
-                rerenderQuestions();
-                // Avança automaticamente para a próxima pergunta
-                setTimeout(() => {
-                    if (currentQuestion < questions.length - 1) {
-                        showQuestion(currentQuestion + 1);
-                    }
-                }, 300);
-            }
             
             updateButtons();
         }
@@ -871,26 +826,11 @@
             const saved = localStorage.getItem('matriculaOabData');
             if (saved) {
                 formData = JSON.parse(saved);
-                updateQuestionFlow();
             }
         }
 
         function saveData() {
             localStorage.setItem('matriculaOabData', JSON.stringify(formData));
-        }
-
-        function rerenderQuestions() {
-            const container = document.getElementById('formContent');
-            
-            // Remove todas as perguntas antigas
-            document.querySelectorAll('.question').forEach(q => q.remove());
-            
-            // Re-renderiza com o novo fluxo
-            renderQuestions();
-            
-            // Mantém na pergunta atual ou ajusta se necessário
-            const newIndex = Math.min(currentQuestion, questions.length - 1);
-            showQuestion(newIndex);
         }
 
         function renderQuestions() {
@@ -903,7 +843,7 @@
 
                 let inputHtml = '';
 
-                if (q.type === 'text' || q.type === 'tel') {
+                if (q.type === 'text' || q.type === 'tel' || q.type === 'email') {
                     let displayValue = formData[q.id] || '';
                     
                     if (q.id === 'cpf' && displayValue) {
@@ -952,14 +892,6 @@
                             oninput="handleInput('${q.id}')"
                         >
                     `;
-                } else if (q.type === 'select') {
-                    const selectedValue = formData[q.id] || '';
-                    inputHtml = `
-                        <select id="${q.id}" onchange="handleInput('${q.id}')">
-                            <option value="">Selecione...</option>
-                            ${q.options.map(opt => `<option value="${opt}" ${selectedValue === opt ? 'selected' : ''}>${opt}</option>`).join('')}
-                        </select>
-                    `;
                 } else if (q.type === 'radio') {
                     inputHtml = '<div class="radio-group">';
                     q.options.forEach(option => {
@@ -988,7 +920,12 @@
 
         function updateButtons() {
             const currentQ = questions[currentQuestion];
-            const hasValue = formData[currentQ.id] && formData[currentQ.id].trim() !== '';
+            let hasValue = formData[currentQ.id] && formData[currentQ.id].trim() !== '';
+            
+            // Validação adicional para email
+            if (currentQ.id === 'email' && hasValue) {
+                hasValue = validateEmail(formData[currentQ.id]);
+            }
             
             document.getElementById('btnNext').disabled = !hasValue;
             document.getElementById('btnBack').disabled = currentQuestion === 0;
@@ -1043,15 +980,14 @@
                 'cpf': 'CPF',
                 'rg': 'RG',
                 'telefone': 'Telefone',
+                'email': 'E-mail',
                 'cep': 'CEP',
                 'logradouro': 'Endereço',
                 'numero': 'Número',
                 'cidade': 'Cidade',
                 'estado': 'Estado',
                 'concluiu_ensino_superior': 'Concluiu o Ensino Superior?',
-                'instituicao_concluida': 'Instituição onde Concluiu',
-                'instituicao_cursando': 'Instituição onde Estuda',
-                'semestre_atual': 'Semestre Atual'
+                'instituicao': 'Instituição de Ensino'
             };
 
             questions.forEach(q => {
@@ -1092,15 +1028,15 @@
                     cpf: formData.cpf,
                     rg: formData.rg,
                     telefone: formData.telefone,
+                    email: formData.email.toLowerCase(),
                     cep: formData.cep,
                     logradouro: formData.logradouro,
                     numero: formData.numero,
                     cidade: formData.cidade,
                     estado: formData.estado,
                     concluiu_ensino_superior: formData.concluiu_ensino_superior === 'Sim',
-                    instituicao_concluida: formData.instituicao_concluida ? formData.instituicao_concluida.toUpperCase() : null,
-                    instituicao_cursando: formData.instituicao_cursando ? formData.instituicao_cursando.toUpperCase() : null,
-                    semestre_atual: formData.semestre_atual || null
+                    instituicao: formData.instituicao ? formData.instituicao.toUpperCase() : null,
+                    semestre_atual: formData.concluiu_ensino_superior === 'Estou cursando' ? 'Em andamento' : null
                 };
 
                 const response = await fetch(`${SUPABASE_URL}/rest/v1/matriculas_oab`, {
@@ -1138,5 +1074,4 @@
         updateNextButton();
     </script>
 </body>
-
 </html>
