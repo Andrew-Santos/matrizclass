@@ -1088,7 +1088,7 @@
         async function confirmSubmit() {
             try {
                 const dataToSend = {
-                    nome_completo: formData.nome_completo,
+                    nome_completo: formData.nome_completo.toUpperCase(),
                     cpf: formData.cpf,
                     rg: formData.rg,
                     telefone: formData.telefone,
@@ -1098,8 +1098,8 @@
                     cidade: formData.cidade,
                     estado: formData.estado,
                     concluiu_ensino_superior: formData.concluiu_ensino_superior === 'Sim',
-                    instituicao_concluida: formData.instituicao_concluida || null,
-                    instituicao_cursando: formData.instituicao_cursando || null,
+                    instituicao_concluida: formData.instituicao_concluida ? formData.instituicao_concluida.toUpperCase() : null,
+                    instituicao_cursando: formData.instituicao_cursando ? formData.instituicao_cursando.toUpperCase() : null,
                     semestre_atual: formData.semestre_atual || null
                 };
 
